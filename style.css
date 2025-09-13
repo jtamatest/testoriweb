@@ -1,0 +1,917 @@
+/* ========= BREAKPOINTS ========= */
+:root {
+  --bp-phone:   480px;   /* iPhone และมือถือเล็ก */
+  --bp-tablet:  768px;   /* iPad / Tablet */
+  --bp-desktop: 1024px;  /* Desktop */
+   --header-h: clamp(52px, 12vw, 84px);  /* ค่าตั้งต้น */ 
+
+     --maxw: 1320px;
+  --gap: 12px;
+  --row: 180px;          /* ความสูง “1 แถว” ของกริด */
+  --radius: 8px;
+}
+
+
+html,body{ 
+  margin:0; 
+  padding:0; 
+  height:auto;
+  width: 100%;
+    overflow-x: hidden; /* ปิด scroll ด้านข้าง */
+}
+
+
+/* reset */
+*{
+  max-width: 100%;  /* ป้องกันภาพ/วิดีโอ/กล่องบาน */
+  box-sizing:border-box;
+  margin:0;
+  padding:0
+}
+img, video { max-width:100%; height:auto; display:block; }
+
+
+body{
+  font-family:"Georgia",serif;
+  height:100%;
+  background:none;
+}
+
+/* fixed gradient background for whole page */
+body::before{
+  content:"";
+  position:fixed; inset:0; 
+  background:linear-gradient(to bottom,#4B1E0A 5%,#512411 90%);
+  z-index: -1;
+}
+
+
+/* กันชนเนื้อหาให้เท่าหัวจริง */
+main{ padding-top: var(--header-h) !important; } 
+
+main > *:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* ===== HEADER ===== */
+#mainHeader{
+  position:fixed;
+  top:0; left:0; right:0;
+  height: var(--header-h)!important; /* กันโดน media-query ทับ */
+  padding: 0 clamp(8px, 4vw, 24px);
+  display:flex; 
+  align-items:center; 
+  gap:16px;
+ background-color: #4B1E0A;
+  color:#FADD84;
+  z-index: 10000;
+ transition:height .25s ease;
+ padding-top: 0;                      /* กันลอย */
+ border-bottom:1px solid #4B1E0A;
+}
+
+
+
+
+
+/* Solid color overlay (fades in via JS) */
+#mainHeader .overlay{
+  position:absolute; inset:0;
+  background:#4B1E0A;
+  opacity:0; pointer-events:none;
+  transition:opacity .25s linear;
+}
+
+.logo-wrap{ position:relative; z-index:1; display:flex; align-items:center; }
+.logo{ display:block;   
+  height: calc(var(--header-h) - 12px);
+  width: auto;
+  max-width: none; 
+  opacity:1; transition:opacity .35s ease;
+  margin-left: clamp(8px, 2vw, 20px);
+}
+
+
+
+
+
+
+/* TEXT — hidden and offset LEFT at start */
+#mainHeader .brand-text{
+  position: absolute;
+  color:#FFD87A; white-space:nowrap;
+  opacity:0; transform:translateX(-40px);
+  font-size: clamp(16px, 5vw, 30px);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700; /* ใช้ Bold 700 ถ้าอยากให้เด่น*/
+   letter-spacing: 1px; /* เว้นระยะห่างให้ดูหรู */
+  text-transform: uppercase; /* ถ้าต้องการให้เป็นตัวพิมพ์ใหญ่ */
+  transition:opacity .45s ease, transform .45s ease;
+  margin-left: 0; /* ปิด margin เดิม */ 
+}
+
+
+/* ===== After scroll: collapse logo space, show text 20px from left ===== */
+body.swap #mainHeader .brand{
+  padding-left:20px;             /* final inset from the left */
+}
+body.swap #mainHeader .logo{
+  opacity:0;                     /* fade out; no width reserved */
+}
+body.swap #mainHeader .brand-text{
+  opacity:1; transform:translateX(0); /* fade + slide in from LEFT */
+}
+
+body.menu-open #mainHeader, #mainHeader .overlay {
+  background:transparent;
+}
+/* ซ่อน logo และ brand-text ตอนเมนูเปิด */
+body.menu-open #mainHeader .logo-wrap,
+body.menu-open #mainHeader .brand-text {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Reset */
+ul { 
+  list-style: none; 
+  margin: 0; padding: 0; }
+
+
+.navbar {
+  margin-left: auto;    /* ดันไปขวาสุด */
+  margin-right: 80px;   /* แล้วถอยกลับมาซ้ายหน่อย (ปรับเลขได้) */
+  height: 60px;
+  padding: 0 24px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  position: relative;
+}
+/* Navbar container */
+.navbar ul {
+  list-style: none;
+  display: flex;              /* put items in a row */
+  gap: 1.25rem;                  /* space between links */
+  justify-content: flex-end; /* push items to the right */
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  /*  margin-right: 60px; /* move closer to right edge */
+}
+
+/* Menu links */
+.navbar ul li a {
+  position: relative;          /* สำคัญ! ให้ ::after วางได้ถูกจุด */
+  display: inline-block;       /* กันเส้นยืดเต็ม li */
+  padding-bottom: 4px;         /* เผื่อที่ให้เส้น */
+  text-decoration: none;
+  color: #fff5d7;
+  font-size: 1.5rem;
+  transition: color .3s ease;
+  letter-spacing: .03em;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+}
+/* เส้นขีดล่าง */
+.navbar ul li a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;                /* ระยะจากตัวอักษร ปรับได้ */
+  width: 0%;
+  height: 2px;
+  background: #C97F4B;
+  /*transition: width .3s ease-in-out;*/
+}
+
+/* ให้เส้นวิ่งตอน hover/focus */
+.navbar ul li a:hover::after,
+.navbar ul li a:focus-visible::after {
+  width: 100%;
+}
+/* Hover effect */
+.navbar ul li a:hover {
+  color: #C97F4B;             /* lighter gold/cream on hover */
+}
+
+/* Right-side container */
+.right-icons {
+  position: absolute;
+  top: 50%;              /* center vertically in header */
+  right: clamp(8px, 3vw, 20px); 
+  gap: clamp(2px, 2vw, 8px);
+  display: flex;
+  align-items: center;   /* vertical alignment */
+  transform: translateY(-50%);
+  z-index: 20001;
+}
+
+
+
+
+/* กล่องไอคอน/ปุ่มให้หน้าตาเหมือนกัน */
+.right-icons a{
+  display:grid;               /* ไว้สำหรับไอคอน FB/IG */
+  place-items:center;
+  width: clamp(22px, 8vw, 40px);
+  height: clamp(30px, 8vw, 40px);
+  color:#FFF5D7;
+  text-decoration:none;
+  transition:transform .15s ease, background .2s, border-color .2s, color .2s;
+}
+
+
+.right-icons .hamburger{
+    width: clamp(22px, 8vw, 40px);
+  height: clamp(22px, 8vw, 40px);
+  color:#FFF5D7;
+}
+
+/* ไอคอน FB/IG ขนาด */
+.right-icons a i{ font-size: clamp(20px, 6vw, 28px); }
+
+/* hover/focus */
+.right-icons a:hover,
+.right-icons .hamburger:hover{
+  transform:translateY(-1px);
+  border-color:#C97F4B;
+  color:#C97F4B;
+}
+
+
+
+.textmain{
+  height: 100px;
+  width: 100%;
+   display: inline-block;
+   margin-top:  30px;
+   padding:  14px 30px;
+   color: #fff5d7;
+   font-size: 1rem;
+   text-decoration: none;
+   transition: all 0.3s ease;
+   cursor: pointer;
+
+}
+.textmain:hover{
+  background-color: #4B1E0A;
+}
+
+/* ===== Hamburger Button ===== */
+.hamburger {
+  position: static;                /* อยู่ใน .right-icons */
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: 0;                       /* ใช้ border จาก .right-icons แทน */
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  gap: 5px;
+}
+
+/* เส้นของ hamburger */
+.hamburger span {
+  display: block;
+  width: clamp(20px, 6vw, 26px);
+  height: 2px;                    /* เปลี่ยนเป็น 2px ได้ถ้าต้องการบางลง */
+  background: currentColor;
+  border-radius: 2px;
+  margin: 0;
+  transition: transform 0.25s, opacity 0.2s;
+}
+
+/* เก็บเอฟเฟกต์เป็น X เมื่อ active */
+.hamburger.active span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+.hamburger.active span:nth-child(2){ opacity:0; }
+.hamburger.active span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+
+body.menu-open { overflow: hidden; }
+
+
+/* Half-page overlay that slides in from the right */
+.menu-overlay{
+  position: fixed;
+  inset: 0;                         /* << คลุมทั้งจอ */
+/*  top: 0;right: 0;   height: 100vh; width: 35vw;*/
+  background: rgba(75,30,10,0.9);
+  backdrop-filter: blur(2px);
+   z-index: 20010;               /* below the hamburger (which is 10000) */
+
+  display: grid;                    /* จัดเมนูให้อยู่กลาง */
+  place-items: center;
+  opacity: 0;
+  visibility: hidden;
+  /*display: flex;*/
+  align-items: center;       /* จัดแนวตั้งตรงกลาง */
+  pointer-events: none;
+  transform: translateX(100%);      /* ซ่อนแบบเลื่อนจากขวา (จะเปลี่ยนเป็น 0 ตอนเปิด) */
+  transition: opacity .28s ease, visibility .28s ease, transform .28s ease;
+  
+
+}
+
+body.menu-open .menu-overlay{
+  transform: translateX(0);
+  opacity: 1;                 /* <- ทำให้เห็น */
+  pointer-events: auto;       /* <- คลิกได้ */
+  visibility: visible;
+}
+
+
+
+
+
+
+/* ===== รายการเมนู ===== */
+.menu-list  {
+  display: flex;
+  flex-direction: column;
+  text-align: center; 
+}
+
+.menu-list  li {
+  list-style: none;    /* remove bullets */
+  margin: 20px 0;
+}
+
+.menu-list a{ color:#FADD84; text-decoration:none; font:700 20px/1.2 "Oswald", sans-serif; }
+
+.menu-list a:hover {
+  color: #C97F4B;   /* สีทองตามธีม */
+  /*text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: bold;*/
+}
+
+
+
+
+/******************** Chapter 01 Video present *****************/
+/* ทำให้เซคชันฮีโร่สูงเท่าหน้าจอ */
+.chapter01{
+  position: relative;
+  width: 100%;
+  height: 100vh;            /* desktop เต็มจอประมาณ 90% */
+  min-height: 500px;       /* กันไม่ให้เตี้ยเกินไป */
+  margin-top: calc(-1 * var(--header-h));
+  overflow: hidden;
+  padding: 0;
+}
+
+
+@supports (height: 100dvh){
+  .chapter01{ min-height: 100dvh; } /* mobile viewport ใหม่ */
+}
+
+.chapter01 .video-bg {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100%;
+  object-fit: cover;      /* ครอบเต็ม ไม่เว้นขอบดำ */
+  object-position: center;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+
+
+
+
+.chapter01 .video-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4); /* ใส่ overlay มืด */
+  z-index: 2;
+}
+
+
+.chapter01 .video-content {
+  position :absolute;
+  z-index: 3;
+  color: #fff5d7;
+  text-align : center;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  width: 90%;
+   opacity: 0;
+  transition: opacity 2s ease;
+}
+
+.video-content.show {
+  opacity: 1;
+}
+
+
+
+.chapter01 .video-content h1{
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700; /* ใช้ Bold 700 ถ้าอยากให้เด่น */
+    font-size: clamp(3rem, 5vw, 8rem); /* responsive font */
+    line-height: 1;
+    margin: 0;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+}
+.chapter01 .video-content h2{
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700; /* ใช้ Bold 700 ถ้าอยากให้เด่น */
+    font-size: clamp(3rem, 5vw, 8rem); /* responsive font */
+    line-height: 1;
+    margin: 0;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+    color: #FADD84;
+}
+
+.chapter01 .video-content p {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700; /* ใช้ Bold 700 ถ้าอยากให้เด่น */
+  font-size: clamp(20px, 3vw ,30px);
+  line-height: 1.05;
+  letter-spacing: 0.65em;
+  margin-bottom: .4em;
+  color: #FADD84;
+}
+
+
+
+.barline{
+  position: relative;
+  display: inline-block;
+  padding: 4px 12px;
+  z-index: 1;
+}
+/* แถบสีน้ำตาลแบบอนิเมชัน (ขยายจากซ้าย→ขวา) */
+.barline::before{
+  content: "";
+  position: absolute;
+  inset: 0;                 /* คลุมเท่าข้อความ */
+  background: #4B1E0A;
+  z-index: -1;              /* ไปไว้ใต้ตัวอักษร */
+  border-radius: 4px;
+  transform: scaleX(0);     /* เริ่มจาก 0 */
+  transform-origin: left center;
+  transition: transform 1s ease-in-out;
+}
+
+/* เมื่อมีคลาส animate ให้กางเต็ม */
+.barline.animate::before{
+  transform: scaleX(1);
+}
+/******************** Chapter 01 Video present *****************/
+
+
+
+
+
+/******************** Chapter 02 about us *****************/
+
+.full-bleed{
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
+}
+
+/* สูงเท่าที่ต้องการ */
+.chapter02{
+  min-height: 80vh;           /* ปรับได้ เช่น 70–100vh */
+  display: grid;
+  place-items: center;
+  overflow: hidden;           /* กันส่วนเกิน */
+  /* ภาพอิฐเต็มหน้าจอเสมอ */
+  background: url("images/wallpaper_01_2.png") center / cover no-repeat;
+}
+
+/* เพิ่ม overlay เฉียง */
+.chapter02::before {
+  content: "";
+  position: absolute;
+  top:-30px; bottom:-30px; left:-30px; right:-30px; /* ขยายกล่องออกนอกขอบ */
+  background: rgba(201, 127, 75, 0.6); /* สีส้มโปร่งแสง */
+  clip-path: polygon(
+  100% 30%,
+  0% 0%,
+  0% 70%,
+  100% 100%
+);
+  z-index: 1;
+}
+
+.text02 {
+  font-family: 'Oswald', sans-serif;
+  position: absolute;
+  max-width: 800px;
+  color: #FFF5E1;
+  text-align: center;
+  padding: 20px;
+  z-index: 1;
+}
+
+/* หัวข้อใหญ่ ปรับให้ responsive */
+.text02 h2 {
+  font-size: clamp(1.5rem, 4vw, 3rem); /* 24px → 48px */
+  color: #faebd7;
+  margin-bottom: 24px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* เนื้อหา paragraph */
+.text02 p {
+  font-size: clamp(1rem, 2.5vw, 1.25rem); /* 14px → 20px */
+  line-height: 1.7;
+  margin-bottom: 15px;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+/******************** Chapter 02 about us *****************/
+
+
+
+/******************** Chapter 03 reservation *****************/
+.chapter03 {
+  min-height: clamp(800px, 85vh, 1200px);  /* tall on big screens, still OK on small */
+  padding: clamp(48px, 7vw, 120px) 20px;   /* more generous vertical padding */
+ border-radius: 10px;
+ position: relative; z-index: 2;
+background: linear-gradient(to bottom, #D2956E 0%, #E6BE8A 50%, #FFF5D7 100%);
+}
+
+
+/* กล่องเนื้อหา */
+.reserve-wrap{
+  max-width: 1440px;   /* ↑ from 980px so the widget has room to stretch */
+  margin: 0 auto;
+  text-align: center;
+  display: flex;               /* เพิ่ม */
+  flex-direction: column;    
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px; 
+}
+/* หัวข้อ + คำอธิบาย */
+.reserve-title{
+  margin: 0;
+  font-size: clamp(28px,4vw,44px);
+  font-family: 'Oswald', sans-serif;
+  color:#4B1E0A;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+.reserve-sub{
+  margin: 6px 0 8px; 
+  color:#4B1E0A;
+  font-family: 'Oswald', sans-serif;
+  opacity:.85;
+  letter-spacing: .02em;
+}
+
+
+/* เริ่มต้น: โชว์ wide, ซ่อน compact */
+#ot-widget-wide   { display:block; }
+#ot-widget-compact{ display:none;  }
+
+
+
+.reserve-foot {
+  text-align: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(16px, 2vw, 22px);
+  color: #512411;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: -120px; /* ดึงขึ้นมาใกล้ widget มากขึ้น */
+}
+
+
+
+
+/******************** Chapter 04 order online *****************/
+
+/* ===== Section 4: Online Order ===== */
+
+/* ให้เลื่อนมาไม่โดน header บังเวลา click #online-order */
+#online-order { scroll-margin-top: calc(var(--header-h) + 12px) !important; }
+
+.full-bleed2{
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
+}
+
+/* สูงเท่าที่ต้องการ */
+.chapter04{
+  position: relative;
+  min-height: 80vh;
+  display: flex;                  /* เปลี่ยนจาก grid เป็น flex */
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;    /* <<< ดันคอนเทนต์ไปด้านบน */
+  padding-top: clamp(8px, 6vh, 64px);  /* <<< ระยะจากขอบบน (ปรับเลขนี้ได้) */
+  gap: clamp(20px, 1vw, 50px);     /* ระยะระหว่างข้อความกับโลโก้ */
+  overflow: hidden;
+  background: url("images/wallpaper_01_3.png") center / cover no-repeat;
+  z-index: 1;
+}
+
+
+.chapter04 .section-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+   background: rgba(145, 73, 22, 0.6); /* สีส้มโปร่งแสง */
+  clip-path: polygon(
+  15% 0%,
+  85% 0%,
+  85% 100%,
+ 15% 100%
+);
+  pointer-events: none; /* ให้คลิกทะลุ overlay ได้ */
+   z-index:2;
+}
+
+
+/* เนื้อหาข้อความ */
+.text04{
+  font-family: 'Oswald', sans-serif;
+  position: relative;            /* เปลี่ยนจาก absolute */
+  width: clamp(280px, 60%, 800px);/* 70% ของความกว้าง section, สูงสุด 800px */
+  margin: 0 auto;                 /* จัดกลาง */
+  text-align: center;
+   /* ลด padding ล่างให้ชิด */
+   margin-top: 20px;
+  z-index: 3;
+  color: #faebd7;
+}
+
+
+/* หัวข้อ */
+.text04 h2{
+  font-size: clamp(1.5rem, 4vw, 3rem);
+    margin-bottom: 20px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* เนื้อหา */
+.text04 p{
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  line-height: 1.7;
+   margin-bottom: 20px;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* โลโก้แถวล่าง */
+.order-links{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(16px, 3vw, 50px);
+  flex-wrap: wrap;
+  z-index: 3;
+}
+
+.order-logo{
+  width: clamp(64px, 8vw, 100px);
+  height: auto;
+  transition: transform .2s ease, box-shadow .2s ease;
+  cursor: pointer;
+}
+.order-logo:hover{ transform: scale(1.08); }
+
+
+
+/***************** Chapter 05 **********************/
+#contact { scroll-margin-top: 120px; }
+
+.chapter05 {
+  position: relative;
+  min-height: 600px;
+  background: linear-gradient(to top, #D2956E 0%, #E6BE8A 50%, #FFF5D7 100%);
+  padding: 100px 20px 120px;
+  z-index: 1;
+}
+
+/* เนื้อหาข้อความ */
+.text05 {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  font-family: 'Spectral', serif;
+  font-size: 20px;
+  color: #4B1E0A;
+  line-height: 1.35;          /* เดิม 0.75 → อ่านง่ายขึ้น */
+}
+
+/* หัวข้อ */
+.text05 h2{
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(28px,4vw,44px);
+  color: #4B1E0A;
+  margin: 0 0 10px;
+}
+
+.text05 h3{
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(15px,2vw,20px);
+  color: #4B1E0A;
+  margin: 22px 0 6px;   /* more top margin = more gap above heading */
+}
+
+.text05 p{
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(12px,2vw,18px);
+  color: #4B1E0A;
+    margin: 4px 0 14px;   /* more bottom margin under text */
+}
+
+/* ← ที่เคยพิมพ์ผิด: ต้องมีจุดหน้าคลาส .text05 */
+.text05 p .day  { font-weight: 700; }   /* วันตัวหนา */
+.text05 p .time { font-weight: 400; }   /* เวลาเป็นตัวปกติ */
+
+.map-container {
+  max-width: 1000px;
+  margin: 12px auto 0;
+  border: 3px solid #FFD87A;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+
+
+
+
+
+
+
+
+/* ===== Masonry Grid (CSS Grid) ===== */
+.gallery-wrap{ max-width:var(--maxw); margin:0 auto 40px; padding:0 16px; }
+.memory{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: var(--row);     /* ความสูงพื้นฐานของแถว */
+  gap: var(--gap);
+}
+
+/* ช่องมาตรฐาน */
+.tile{ position:relative; overflow:hidden; border-radius:var(--radius); background:#ddd; cursor:zoom-in; }
+.tile img{ width:100%; height:100%; object-fit:cover; transition:transform .35s ease; }
+.tile:hover img{ transform:scale(1.05); }
+
+/* ตัวช่วยขนาด: คูณจำนวนแถว/คอลัมน์ */
+.span-2x1{ grid-column: span 2; grid-row: span 1; } /* กว้าง 2 ช่อง */
+.span-1x2{ grid-column: span 1; grid-row: span 2; } /* สูง 2 แถว */
+.span-2x2{ grid-column: span 2; grid-row: span 2; } /* ใหญ่ */
+
+@media (max-width: 1100px){
+  .memory{ grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 720px){
+  .memory{ grid-template-columns: repeat(2, 1fr); }
+  :root{ --row: 160px; }
+}
+
+/* ===== Lightbox ===== */
+.lightbox{
+  position: fixed; inset:0; display:grid; place-items:center;
+  background: rgba(0,0,0,.85);
+  opacity:0; visibility:hidden; transition:opacity .25s ease, visibility .25s ease;
+  z-index: 999;
+}
+.lightbox.open{ opacity:1; visibility:visible; }
+.lb-frame{
+  position:relative; max-width:min(92vw,1200px); max-height:92vh; overflow:hidden;
+  border-radius:12px; background:#000;
+}
+.lb-img{ max-width:100%; max-height:92vh; object-fit:contain; }
+
+/* Buttons */
+.lb-btn{
+  position:absolute; top:50%; transform:translateY(-50%);
+  border:0; background: rgba(0,0,0,.45); color:#fff;
+  width:44px; height:44px; border-radius:50%; cursor:pointer; font-size:22px;
+}
+.lb-prev{ left:10px; }
+.lb-next{ right:10px; }
+.lb-close{ top:10px; right:10px; transform:none; width:40px; height:40px; font-size:20px; }
+.lb-btn:hover{ background: rgba(255,255,255,.25); }
+
+
+
+/*************** footer **************/
+.fixed-footer {
+  position: fixed;
+  left: 0;   
+  bottom: 0 ;
+  width: 100%;
+  background-color: #612b14;
+  color: #fff5d7;
+  text-align: center;
+  padding:  10px 0;
+  font-size: 12px;
+  z-index:  9998;
+  max-width: 100%;
+  overflow-x: hidden;
+  white-space: normal;  /* ให้ตัดบรรทัดถ้าข้อความยาว */
+  text-align: center;
+  box-sizing: border-box; /* ป้องกัน padding ดันเกินจอ */
+}
+
+
+.fixed-footer a {
+  color: inherit;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+.fixed-footer a:hover{
+  font-weight: bold;
+}
+
+
+@supports (-webkit-touch-callout: none){
+  .chapter01 .video-bg { height: 100%; }
+}
+
+/* มือถือ: ซ่อน navbar โชว์ hamburger */
+@media (max-width: 767.98px)
+{
+  .navbar{ display:none !important; }
+  .hamburger{ display:flex !important; }
+  .chapter01 
+    {
+      height: 60vh;       /* ลดความสูงลง */
+      min-height: 300px;
+    }
+  /* เพิ่ม overlay เฉียง */
+  .chapter02::before 
+    {
+      clip-path: polygon(
+        100% 20%,
+        0% 0%,
+        0% 80%,
+        100% 100%);
+    }
+    #ot-widget-wide   { display:none;  }
+    #ot-widget-compact{ display:block; }
+
+    .reserve-foot {
+      margin-top: 20px; /* ดึงขึ้นมาใกล้ widget มากขึ้น */
+    }
+
+    .chapter04{
+  gap: 10px;          /* ระยะระหว่างข้อความกับโลโก้ */
+    }
+    .order-links {
+    flex-direction: column;
+    gap: 16px; /* ลดระยะห่างโลโก้ให้พอดีจอมือถือ */
+    margin-top: 0px;
+  }
+    .order-logo {
+    max-width: 60px; /* โลโก้เล็กลง */
+  }
+  .chapter04 .section-overlay {
+   background: rgba(145, 73, 22, 0.6); /* สีส้มโปร่งแสง */
+  clip-path: polygon(
+  10% 0%,
+  90% 0%,
+  90% 100%,
+ 10% 100%
+);
+}  
+
+
+
+
+  
+}
+/* แท็บเล็ตขึ้นไป: โชว์ navbar ซ่อน hamburger */
+@media (min-width: 768px){
+  .navbar{ display:flex !important; margin-left:auto; }
+  .hamburger{ display:none !important; }
+
+}
+
+
